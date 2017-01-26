@@ -72,6 +72,10 @@ $(document).ready(function(){
 			//Draw the image on the visible canvas depending on the aspect ratio of the image.
 			$(img).on("load", function(){
 
+				var sel_ratio = 1;
+				if(typeof that.square === "number")
+					sel_ratio = that.square;
+
 				if(img.width > img.height){
 					that.can.width = img.width;
 					that.can.height = img.height;
@@ -85,8 +89,8 @@ $(document).ready(function(){
 
 					ctx.drawImage(img, 0, 0, that.can.width, that.can.height);
 
-					iEdit.selectionBox.height($(that.can).height()-20);
-					iEdit.selectionBox.width($(that.can).height()-20);
+					iEdit.selectionBox.height( ($(that.can).height() - 20) / sel_ratio );
+					iEdit.selectionBox.width( $(that.can).height() - 20 );
 
 					iEdit.selectionBox.css({'left': (($(window).width()/2) - $(that.can).height()/2) + 10  + 'px' ,'top': $(window).height()/2 - $(that.can).height()/2 - 15 + 'px' });
 
@@ -103,8 +107,8 @@ $(document).ready(function(){
 
 					ctx.drawImage(img, 0, 0, that.can.width, that.can.height);
 
-					iEdit.selectionBox.height($(that.can).width()-20);
-					iEdit.selectionBox.width($(that.can).width()-20);
+					iEdit.selectionBox.height( ($(that.can).width() - 20) / sel_ratio );
+					iEdit.selectionBox.width( $(that.can).width() - 20 );
 
 					iEdit.selectionBox.css({'left': (($(window).width()/2) - $(that.can).width()/2) + 10  + 'px' ,'top': $(window).height()/2 - $(that.can).width()/2 - 15 + 'px' });
 
@@ -123,7 +127,7 @@ $(document).ready(function(){
 
 					ctx.drawImage(img, 0, 0, that.can.width, that.can.height);
 
-					iEdit.selectionBox.height($(that.can).width()-20);
+					iEdit.selectionBox.height( ($(that.can).width() - 20) / sel_ratio );
 					iEdit.selectionBox.width($(that.can).width()-20);
 				
 					iEdit.selectionBox.css({'left': (($(window).width()/2) - $(that.can).width()/2) + 10  + 'px' ,'top': $(window).height()/2 - $(that.can).width()/2 - 15 + 'px' });
@@ -252,34 +256,74 @@ $(document).ready(function(){
 			var nHeight = rcy;
 
 			if(iEdit.square){
+
+				var sel_ratio = 1;
+				if(typeof iEdit.square === "number")
+					sel_ratio = iEdit.square;
+				
+
 				if(nWidth >= nHeight){//Width is the dominating dimension; 
-					nHeight = nWidth;
-					if(nWidth < 100){
-						nWidth = 100;
-						nHeight = 100;						
-					}
+					nHeight = nWidth/sel_ratio;
 				}else{//Height is the dominating dimension; 
 					nWidth = nHeight;
-					if(nHeight < 100){
-						nWidth = 100;
-						nHeight = 100;
-					}
-				}				
+					nHeight = nWidth/sel_ratio;
+				}	
 
-				if((nWidth + windowOffset(iEdit.selectionBox).left) >= $(iEdit.can).width() + windowOffset($(iEdit.can)).left){
-					nWidth = (windowOffset($(iEdit.can)).left + $(iEdit.can).width()) - (windowOffset(iEdit.selectionBox).left);
-					if(windowOffset(iEdit.selectionBox).top + nWidth > $(iEdit.can).height() + windowOffset($(iEdit.can)).top){
-						nWidth = (windowOffset($(iEdit.can)).top + $(iEdit.can).height()) - (windowOffset(iEdit.selectionBox).top);
-					}
-					nHeight = nWidth;
-				}else if((nHeight + windowOffset(iEdit.selectionBox).top) >= $(iEdit.can).height() + windowOffset($(iEdit.can)).top){
-					nHeight = (windowOffset($(iEdit.can)).top + $(iEdit.can).height()) - (windowOffset(iEdit.selectionBox).top);
-					if(windowOffset(iEdit.selectionBox).left + nHeight > $(iEdit.can).width() + windowOffset($(iEdit.can)).left){
-						nHeight = (windowOffset($(iEdit.can)).left + $(iEdit.can).width()) - (windowOffset(iEdit.selectionBox).left);
-					}
-					nWidth = nHeight;
+
+				if(nWidth < 100 && nWidth >= nHeight){
+					nWidth = 100;
+					nHeight = nWidth/sel_ratio;	
+				}
+				if(nHeight < 100 && nHeight >= nWidth){
+					nHeight = 100;
+					nWidth = nHeight*sel_ratio;
 				}
 
+				/*console.log('n', nWidth, nHeight);			
+				console.log('$(iEdit.can)', $(iEdit.can).width(), $(iEdit.can).height());			
+				console.log('$(iEdit.can) Offset', windowOffset($(iEdit.can)).left, windowOffset($(iEdit.can)).top);			
+				console.log('selectionBox', windowOffset(iEdit.selectionBox).left, windowOffset(iEdit.selectionBox).top, iEdit.selectionBox.width(), iEdit.selectionBox.height())*/
+
+
+				if(nWidth >= $(iEdit.can).width()){
+					nWidth = $(iEdit.can).width();
+					nHeight = nWidth/sel_ratio;
+
+					if(nHeight >= $(iEdit.can).height()){
+						nHeight = $(iEdit.can).height();
+						nWidth = nHeight*sel_ratio;
+					}
+				}
+				if(nHeight >= $(iEdit.can).height()){
+					nHeight = $(iEdit.can).height();
+					nWidth = nHeight*sel_ratio;
+
+					if(nWidth >= $(iEdit.can).width()){
+						nWidth = $(iEdit.can).width();
+						nHeight = nWidth/sel_ratio;
+					}
+
+				}
+
+
+				if( (windowOffset(iEdit.selectionBox).left - windowOffset($(iEdit.can)).left)+nWidth >= $(iEdit.can).width() ){
+					nWidth = $(iEdit.can).width() - (windowOffset(iEdit.selectionBox).left - windowOffset($(iEdit.can)).left);
+					nHeight = nWidth/sel_ratio;
+
+					if( (windowOffset(iEdit.selectionBox).top - windowOffset($(iEdit.can)).top)+nHeight >= $(iEdit.can).height() ){
+						nHeight = $(iEdit.can).height() - (windowOffset(iEdit.selectionBox).top - windowOffset($(iEdit.can)).top);
+						nWidth = nHeight*sel_ratio;
+					}
+				}
+				if( (windowOffset(iEdit.selectionBox).top - windowOffset($(iEdit.can)).top)+nHeight >= $(iEdit.can).height() ){
+					nHeight = $(iEdit.can).height() - (windowOffset(iEdit.selectionBox).top - windowOffset($(iEdit.can)).top);
+					nWidth = nHeight*sel_ratio;
+
+					if( (windowOffset(iEdit.selectionBox).left - windowOffset($(iEdit.can)).left)+nWidth >= $(iEdit.can).width() ){
+						nWidth = $(iEdit.can).width() - (windowOffset(iEdit.selectionBox).left - windowOffset($(iEdit.can)).left);
+						nHeight = nWidth/sel_ratio;
+					}
+				}
 
 			}else{
 
