@@ -47,16 +47,16 @@ The return can be used to check if the image supplied is valid and take appropri
 
 <h3>Example</h3>
 <code>
-$(document).ready(function(){<br>
-$("input[type=file]").change(function(e){<br>
-var img = e.target.files[0];<br>
-if( !iEdit.open(img, true, function(res){<br>
-$("img#result").attr("src", res);<br>	
-}, "png", 0.85) ){<br>
-alert("The image provided is not valid!");<br>
-}<br>
-});<br>
-});<br>
+$(document).ready(function(){
+	$("input[type=file]").change(function(e){
+		var img = e.target.files[0];
+		if( !iEdit.open(img, true, function(res){
+			$("img#result").attr("src", res);
+		}, "png", 0.85) ){
+			alert("The image provided is not valid!");
+		}
+	});
+});
 </code>
 </li>
 <li>
