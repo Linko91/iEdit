@@ -41,24 +41,32 @@ $(document).ready(function(){
 		//Open the Image Editor with appropriate settings
 		open: function(imgObj, square, callback, imageType, imageQuality){
 
-			this.drag = false,
-			this.resize = false,
+			if(imgObj.constructor !== File || !imgObj.type.match('image.*')){
+				return false;
+			}
 
-			this.square = square || false,
-			this.imageQuality = imageQuality || 1;
+			this.drag = false;
+			this.resize = false;
+			
+			//Using the supplied settings or using defaults in case of invalid settings
+
+			this.square = (square === true) ? true : false;
+			this.imageQuality = (Number(imageQuality) > 0 && Number(imageQuality) <= 1) ? Number(imageQuality) : 1;
 
 			if(imageType == "jpeg" || imageType == "png" || imageType == "gif" || imageType == "bmp"){ //JPG and any other would default to JPEG//
-				this.imageType = imageType || "jpeg";
+				this.imageType = imageType;
 			}else{
 				this.imageType = "jpeg";	
 			}
 
-			//niu = Not In Use
-			this.grcx = "niu",
-			this.grcy = "niu",
+			//false: Not In Use
+			this.grcx = false;
+			this.grcy = false;
 			
-			//Specifyinf user callback
-			this.callback = callback,
+			//Checking if callback is a valid function
+			var getType = {};
+			this.callback = (callback && getType.toString.call(callback) === '[object Function]') ? callback : false;
+			 
 			this.status = true;
 
 			var ctx = this.can.getContext("2d");
@@ -136,7 +144,7 @@ $(document).ready(function(){
 			});
 			
 			img.src = URL.createObjectURL(imgObj);
-			
+			return true;
 		},
 
 		//Close the image editor and reset the settings.
@@ -177,13 +185,13 @@ $(document).ready(function(){
 		}
 	}
 
-	//Set flags to stop trachong mouse movement.
+	//Set flags to stop tracking mouse movement.
 	$(document).on("mouseup",function(){
 		iEdit.drag = false;
 		iEdit.resize = false;	
 
-		iEdit.grcx = 'niu';
-		iEdit.grcy = 'niu';
+		iEdit.grcx = false;
+		iEdit.grcy = false;
 	});
 
 
@@ -194,8 +202,8 @@ $(document).ready(function(){
 		var rcx = e.clientX - windowOffset(that).left;
 		var rcy = e.clientY - windowOffset(that).top;
 
-		iEdit.grcx = 'niu';
-		iEdit.grcy = 'niu';
+		iEdit.grcx = false;
+		iEdit.grcy = false;
 
 		if( (iEdit.selectionBox.width() - rcx <= 28) && (iEdit.selectionBox.height() - rcy <= 28)){
 			iEdit.drag = false;
@@ -217,11 +225,11 @@ $(document).ready(function(){
 
 		if(iEdit.drag === true && iEdit.status){
 
-			if(iEdit.grcx === 'niu'){
+			if(iEdit.grcx === false){
 				iEdit.grcx = rcx;
 			}
 
-			if(iEdit.grcy === 'niu'){
+			if(iEdit.grcy === false){
 				iEdit.grcy = rcy;
 			}
 
@@ -339,10 +347,8 @@ $(document).ready(function(){
 				if(e.clientY >= $(iEdit.can).height() + windowOffset($(iEdit.can)).top){	//REASON: Same logic as nWidth
 					nHeight = (windowOffset($(iEdit.can)).top + $(iEdit.can).height()) - (windowOffset(iEdit.selectionBox).top);
 				}
-
 			}
-
-
+			
 			iEdit.selectionBox.css({
 				"width":nWidth+"px",
 				"height":nHeight+"px",				
@@ -355,7 +361,7 @@ $(document).ready(function(){
 	//Process the selected region and return it as an image to the user defined callback.
 	iEdit.saveBtn.on("click", function(){
 
-		if(iEdit.callback == undefined){
+		if(!iEdit.callback){
 			iEdit.close();
 			return;
 		}
