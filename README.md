@@ -46,6 +46,7 @@ Returns <code>true</code> if the image supplied is valid. Returns <code>false</c
 The return can be used to check if the image supplied is valid and take appropriate actions.
 
 <h3>Example</h3>
+<pre>
 <code>
 $(document).ready(function(){<br>
 	$("input[type=file]").change(function(e){<br>
@@ -58,6 +59,7 @@ $(document).ready(function(){<br>
 	});<br>
 });<br>
 </code>
+</pre>
 </li>
 <li>
 <h4><code>iEdit.close()</code></h4>
